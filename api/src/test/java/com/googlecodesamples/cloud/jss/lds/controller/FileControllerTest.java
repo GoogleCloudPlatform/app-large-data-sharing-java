@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.googlecodesamples.cloud.jss.lds.model.BaseFile;
 import com.googlecodesamples.cloud.jss.lds.model.BaseFileTest;
 import com.googlecodesamples.cloud.jss.lds.service.FileService;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -25,6 +24,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -57,7 +58,7 @@ public class FileControllerTest {
         // generate mock object
         List<BaseFile> expectedResp = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            expectedResp.add(BaseFileTest.getTestFile(size));
+            expectedResp.add(BaseFileTest.getTestFile(size, true));
         }
 
         // set up mock service response
@@ -81,8 +82,8 @@ public class FileControllerTest {
         JsonObject convertedObj = new Gson().fromJson(mockResp, JsonObject.class);
         log.info("convertedObj: " + convertedObj);
 
-        Assert.assertTrue(convertedObj.isJsonObject());
-        Assert.assertEquals(mockResp, convertedObj.toString());
+        assertThat(convertedObj.isJsonObject()).isTrue();
+        assertThat(mockResp).isEqualTo(convertedObj.toString());
     }
 
     @Test

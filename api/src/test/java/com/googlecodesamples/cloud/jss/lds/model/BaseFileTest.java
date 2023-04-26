@@ -1,55 +1,44 @@
 package com.googlecodesamples.cloud.jss.lds.model;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
+
 public class BaseFileTest {
-
-    public static final String BASE_PATH = "192.168.0.1/resource";
-
-    public static final String FILE_ID = "test";
-
-    public static final String FULL_PATH = BASE_PATH + "/" + FILE_ID;
 
     @Test
     public void testGetThumbnailPath() {
-        BaseFile file = getTestFile(1);
-        Assert.assertEquals("test-path-1_small", file.getThumbnailPath());
+        BaseFile file = getTestFile(1, true);
+        String expected = "test-path-1_small";
+        assertThat(file.getThumbnailPath()).isEqualTo(expected);
     }
 
     @Test
     public void testIsFile() {
-        BaseFile file = getTestFile(1);
-        Assert.assertFalse(file.isImage());
+        BaseFile file = getTestFile(1, false);
+        assertThat(file.isImage()).isFalse();
     }
 
     @Test
     public void testIsImage() {
-        BaseFile image = getTestImage(1);
-        Assert.assertTrue(image.isImage());
+        BaseFile file = getTestFile(1, true);
+        assertThat(file.isImage()).isTrue();
     }
 
-    public static BaseFile getTestFile(int serialNumber) {
+    public static BaseFile getTestFile(int serialNumber, boolean isImage) {
         BaseFile file = new BaseFile();
         file.setId("test-" + serialNumber);
         file.setPath("test-path-" + serialNumber);
-        file.setName("test-filename-" + serialNumber);
-        file.setUrl("resources/test-url" + serialNumber);
-        file.setTags(List.of("test-tag"));
-        file.setCreateTime(new Date());
-        file.setUpdateTime(file.getCreateTime());
-        return file;
-    }
+        if (isImage) {
+            file.setName("test-filename-" + serialNumber + ".png");
+        } else {
+            file.setName("test-filename-" + serialNumber);
+        }
 
-    public static BaseFile getTestImage(int serialNumber) {
-        BaseFile file = new BaseFile();
-        file.setId("test-" + serialNumber);
-        file.setPath("test-path-" + serialNumber);
-        file.setName("test-filename-" + serialNumber + ".png");
-        file.setUrl("resources/test-url" + serialNumber);
+        file.setUrl("resources/test-url-" + serialNumber);
         file.setTags(List.of("test-tag"));
         file.setCreateTime(new Date());
         file.setUpdateTime(file.getCreateTime());
