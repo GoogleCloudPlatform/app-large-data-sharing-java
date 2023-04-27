@@ -16,7 +16,6 @@
 
 package com.googlecodesamples.cloud.jss.lds.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.googlecodesamples.cloud.jss.lds.model.BaseFile;
@@ -38,7 +37,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -50,10 +48,7 @@ public class FileControllerTest {
     private static final Logger log = LoggerFactory.getLogger(FileControllerTest.class);
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper mapper;
+    MockMvc mockMvc;
 
     @MockBean
     FileService fileService;
@@ -72,10 +67,7 @@ public class FileControllerTest {
         int size = 2;
 
         // generate mock object
-        List<BaseFile> expectedResp = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            expectedResp.add(BaseFileTest.getTestFile(size, true));
-        }
+        List<BaseFile> expectedResp = BaseFileTest.getTestFiles(size, true);
 
         // set up mock service response
         Mockito.when(fileService.getFilesByTag(tags, orderNo, size)).thenReturn(expectedResp);

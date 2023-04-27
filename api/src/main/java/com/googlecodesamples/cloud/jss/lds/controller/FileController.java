@@ -1,11 +1,29 @@
+/*
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.googlecodesamples.cloud.jss.lds.controller;
 
 import com.googlecodesamples.cloud.jss.lds.model.BaseFile;
 import com.googlecodesamples.cloud.jss.lds.model.FileResponse;
 import com.googlecodesamples.cloud.jss.lds.service.FileService;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +59,7 @@ public class FileController {
    */
   @GetMapping("/healthchecker")
   public ResponseEntity<?> healthCheck() {
-    log.trace("entering healthCheck()");
+    log.info("entering healthCheck()");
     return ResponseEntity.noContent().build();
   }
 
@@ -54,8 +72,9 @@ public class FileController {
    */
   @PostMapping("/files")
   public ResponseEntity<?> uploadFiles(
-      @RequestParam List<MultipartFile> files, @RequestParam String tags) throws Exception {
-    log.trace("entering uploadFiles()");
+      @RequestParam List<MultipartFile> files, @RequestParam String tags)
+      throws InterruptedException, ExecutionException, IOException {
+    log.info("entering uploadFiles()");
     List<String> tagList = getTagList(tags);
     List<BaseFile> fileList = fileService.uploadFiles(files, tagList);
     return ResponseEntity.status(HttpStatus.CREATED).body(new FileResponse(fileList));
@@ -74,8 +93,8 @@ public class FileController {
       @RequestParam(required = false) String tags,
       @RequestParam(required = false) String orderNo,
       @RequestParam(required = false, defaultValue = "50") int size)
-      throws Exception {
-    log.trace("entering getFilesByTag()");
+      throws InterruptedException, ExecutionException {
+    log.info("entering getFilesByTag()");
     List<String> tagList = getTagList(tags);
     List<BaseFile> fileList = fileService.getFilesByTag(tagList, orderNo, size);
     if (CollectionUtils.isEmpty(fileList)) {
@@ -97,8 +116,8 @@ public class FileController {
       @PathVariable("id") String fileId,
       @RequestParam(required = false) MultipartFile file,
       @RequestParam String tags)
-      throws Exception {
-    log.trace("entering updateFile()");
+      throws InterruptedException, ExecutionException, IOException {
+    log.info("entering updateFile()");
     BaseFile oldFile = fileService.getFileById(fileId);
     if (oldFile == null) {
       return ResponseEntity.notFound().build();
@@ -115,8 +134,9 @@ public class FileController {
    * @return status noContent or notFound
    */
   @DeleteMapping("/files/{id}")
-  public ResponseEntity<?> deleteFile(@PathVariable("id") String fileId) throws Exception {
-    log.trace("entering deleteFile()");
+  public ResponseEntity<?> deleteFile(@PathVariable("id") String fileId)
+      throws InterruptedException, ExecutionException {
+    log.info("entering deleteFile()");
     BaseFile file = fileService.getFileById(fileId);
     if (file == null) {
       return ResponseEntity.notFound().build();
@@ -132,7 +152,7 @@ public class FileController {
    */
   @DeleteMapping("/reset")
   public ResponseEntity<?> resetFile() {
-    log.trace("entering resetFile()");
+    log.info("entering resetFile()");
     fileService.resetFile();
     return ResponseEntity.noContent().build();
   }

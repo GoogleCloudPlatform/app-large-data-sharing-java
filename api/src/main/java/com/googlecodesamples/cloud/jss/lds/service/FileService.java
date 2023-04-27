@@ -1,11 +1,29 @@
+/*
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.googlecodesamples.cloud.jss.lds.service;
 
 import com.googlecodesamples.cloud.jss.lds.model.BaseFile;
 import com.googlecodesamples.cloud.jss.lds.model.FileMeta;
 import com.googlecodesamples.cloud.jss.lds.util.LdsUtil;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileService {
   private static final Logger log = LoggerFactory.getLogger(FirestoreService.class);
+  private static final int THUMBNAIL_SIZE = 300;
   private final FirestoreService firestoreService;
   private final StorageService storageService;
 
@@ -34,8 +53,9 @@ public class FileService {
    * @param tags list of tags label the files
    * @return list of files data
    */
-  public List<BaseFile> uploadFiles(List<MultipartFile> files, List<String> tags) throws Exception {
-    log.trace("entering uploadFiles()");
+  public List<BaseFile> uploadFiles(List<MultipartFile> files, List<String> tags)
+      throws InterruptedException, ExecutionException, IOException {
+    log.info("entering uploadFiles()");
     List<BaseFile> fileList = new ArrayList<>();
     for (MultipartFile file : files) {
       String fileId = LdsUtil.generateUuid();
@@ -54,8 +74,8 @@ public class FileService {
    * @return file data
    */
   public BaseFile updateFile(MultipartFile newFile, List<String> tags, BaseFile file)
-      throws Exception {
-    log.trace("entering updateFile()");
+      throws InterruptedException, ExecutionException, IOException {
+    log.info("entering updateFile()");
     String fileId = file.getId();
     if (newFile == null) {
       String pathId = LdsUtil.getPathId(file.getPath());
@@ -73,7 +93,7 @@ public class FileService {
    * @param file uploaded file
    */
   public void deleteFile(BaseFile file) {
-    log.trace("entering deleteFile()");
+    log.info("entering deleteFile()");
     firestoreService.delete(file.getId());
     storageService.delete(file.getPath());
     storageService.delete(file.getThumbnailPath());
@@ -88,8 +108,8 @@ public class FileService {
    * @return list of files data
    */
   public List<BaseFile> getFilesByTag(List<String> tags, String orderNo, int size)
-      throws Exception {
-    log.trace("entering getFilesByTag()");
+      throws InterruptedException, ExecutionException {
+    log.info("entering getFilesByTag()");
     return firestoreService.getFilesByTag(tags, orderNo, size);
   }
 
@@ -99,14 +119,14 @@ public class FileService {
    * @param fileId unique id of the file
    * @return file data
    */
-  public BaseFile getFileById(String fileId) throws Exception {
-    log.trace("entering getFileById()");
+  public BaseFile getFileById(String fileId) throws InterruptedException, ExecutionException {
+    log.info("entering getFileById()");
     return firestoreService.getFileById(fileId);
   }
 
   /** Delete all files from Firestore and Cloud Storage. */
   public void resetFile() {
-    log.trace("entering resetFile()");
+    log.info("entering resetFile()");
     firestoreService.deleteCollection();
     storageService.batchDelete();
   }
@@ -123,7 +143,7 @@ public class FileService {
    */
   private BaseFile createOrUpdateFile(
       MultipartFile file, List<String> tags, String fileId, String newFileId, long size)
-      throws Exception {
+      throws InterruptedException, ExecutionException, IOException {
     BaseFile newFile =
         createOrUpdateFileMeta(tags, fileId, newFileId, file.getOriginalFilename(), size);
     storageService.save(newFile.getPath(), file.getContentType(), file.getBytes());
@@ -145,7 +165,7 @@ public class FileService {
    */
   private BaseFile createOrUpdateFileMeta(
       List<String> tags, String fileId, String newFileId, String fileName, long size)
-      throws Exception {
+      throws InterruptedException, ExecutionException {
     String fileBucketPath = LdsUtil.getFileBucketPath(basePath, newFileId);
     FileMeta fileMeta = new FileMeta(fileId, fileBucketPath, fileName, tags, size);
     firestoreService.save(fileMeta);
@@ -158,10 +178,10 @@ public class FileService {
    * @param file file to create thumbnail
    * @param thumbnailId unique id of the thumbnail file
    */
-  private void createThumbnail(MultipartFile file, String thumbnailId) throws Exception {
+  private void createThumbnail(MultipartFile file, String thumbnailId) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     Thumbnails.of(file.getInputStream())
-        .size(300, 300)
+        .size(THUMBNAIL_SIZE, THUMBNAIL_SIZE)
         .keepAspectRatio(false)
         .toOutputStream(byteArrayOutputStream);
     storageService.save(thumbnailId, file.getContentType(), byteArrayOutputStream.toByteArray());

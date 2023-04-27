@@ -18,6 +18,7 @@ package com.googlecodesamples.cloud.jss.lds.model;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,37 +28,40 @@ public class BaseFileTest {
 
     @Test
     public void testGetThumbnailPath() {
-        BaseFile file = getTestFile(1, true);
+        BaseFile file = getTestFiles(1, true).get(0);
         String expected = "test-path-1_small";
         assertThat(file.getThumbnailPath()).isEqualTo(expected);
     }
 
     @Test
     public void testIsFile() {
-        BaseFile file = getTestFile(1, false);
+        BaseFile file = getTestFiles(1, false).get(0);
         assertThat(file.isImage()).isFalse();
     }
 
     @Test
     public void testIsImage() {
-        BaseFile file = getTestFile(1, true);
+        BaseFile file = getTestFiles(1, true).get(0);
         assertThat(file.isImage()).isTrue();
     }
 
-    public static BaseFile getTestFile(int serialNumber, boolean isImage) {
-        BaseFile file = new BaseFile();
-        file.setId("test-" + serialNumber);
-        file.setPath("test-path-" + serialNumber);
-        if (isImage) {
-            file.setName("test-filename-" + serialNumber + ".png");
-        } else {
-            file.setName("test-filename-" + serialNumber);
+    public static List<BaseFile> getTestFiles(int serialNumber, boolean isImage) {
+        List<BaseFile> testFiles = new ArrayList<>();
+        for (int i = 0; i < serialNumber; i++) {
+            BaseFile file = new BaseFile();
+            file.setId("test-" + serialNumber);
+            file.setPath("test-path-" + serialNumber);
+            if (isImage) {
+                file.setName("test-filename-" + serialNumber + ".png");
+            } else {
+                file.setName("test-filename-" + serialNumber);
+            }
+            file.setUrl("resources/test-url-" + serialNumber);
+            file.setTags(List.of("test-tag"));
+            file.setCreateTime(new Date());
+            file.setUpdateTime(file.getCreateTime());
+            testFiles.add(file);
         }
-
-        file.setUrl("resources/test-url-" + serialNumber);
-        file.setTags(List.of("test-tag"));
-        file.setCreateTime(new Date());
-        file.setUpdateTime(file.getCreateTime());
-        return file;
+        return testFiles;
     }
 }

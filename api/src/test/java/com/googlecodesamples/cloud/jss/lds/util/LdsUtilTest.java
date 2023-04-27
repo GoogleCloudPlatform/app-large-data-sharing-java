@@ -22,19 +22,32 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class LdsUtilTest {
 
-    private static final String BASE_PATH = "192.168.0.1/resource";
-    private static final String FILE_ID = "test";
-    private static final String FULL_PATH = BASE_PATH + "/" + FILE_ID;
-
     @Test
     public void testGetFileBucketPath() {
-        String fileBucketPath = LdsUtil.getFileBucketPath(BASE_PATH, FILE_ID);
-        assertThat(fileBucketPath).isEqualTo(FULL_PATH);
+        String basePath = "192.168.0.1/resource";
+        String fileId = "test";
+        String fileBucketPath = LdsUtil.getFileBucketPath(basePath, fileId);
+        assertThat(fileBucketPath).isEqualTo("192.168.0.1/resource/test");
     }
 
     @Test
     public void testGetPathId() {
-        String id = LdsUtil.getPathId(FULL_PATH);
-        assertThat(id).isEqualTo(FILE_ID);
+        String id = LdsUtil.getPathId("192.168.0.1/resource/test");
+        assertThat(id).isEqualTo("test");
+
+        id = LdsUtil.getPathId("192.168.0.1/resource/1/2/3/test");
+        assertThat(id).isEqualTo("test");
+
+        id = LdsUtil.getPathId("/resource");
+        assertThat(id).isEqualTo("resource");
+
+        id = LdsUtil.getPathId("/resource/test");
+        assertThat(id).isEqualTo("test");
+    }
+
+    @Test
+    public void testGenerateUuid() {
+        String uuid = LdsUtil.generateUuid();
+        assertThat(uuid.length()).isEqualTo(36);
     }
 }
