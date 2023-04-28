@@ -17,8 +17,12 @@
 package com.googlecodesamples.cloud.jss.lds.model;
 
 import com.googlecodesamples.cloud.jss.lds.util.LdsUtil;
+
 import java.util.List;
 
+/**
+ * The FileMeta class represents the file metadata that corresponds to Firestore database schema
+ */
 public class FileMeta {
   private String id;
   private String path;
@@ -27,7 +31,8 @@ public class FileMeta {
   private String orderNo;
   private long size;
 
-  public FileMeta() {}
+  public FileMeta() {
+  }
 
   public FileMeta(String id, String path, String name, List<String> tags, long size) {
     this.id = id;

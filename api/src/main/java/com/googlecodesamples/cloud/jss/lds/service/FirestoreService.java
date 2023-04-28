@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+/** Backend service controller for Firestore */
 @Service
 public class FirestoreService {
   private static final String TAGS = "tags";
@@ -107,13 +108,13 @@ public class FirestoreService {
    *
    * @param fileId unique id of the file
    */
-  public void delete(String fileId) {
-    firestore.collection(collectionName).document(fileId).delete();
+  public void delete(String fileId) throws InterruptedException, ExecutionException {
+    firestore.collection(collectionName).document(fileId).delete().get();
   }
 
   /** Delete a collection in Firestore. */
-  public void deleteCollection() {
-    firestore.recursiveDelete(firestore.collection(collectionName));
+  public void deleteCollection() throws InterruptedException, ExecutionException {
+    firestore.recursiveDelete(firestore.collection(collectionName)).get();
   }
 
   /**
@@ -129,7 +130,7 @@ public class FirestoreService {
         .collect(Collectors.toList());
   }
 
-  /** Close the channels and free resources. */
+  /** Close the channels and release resources. */
   @PreDestroy
   public void close() throws Exception {
     firestore.close();

@@ -23,15 +23,12 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageBatch;
 import com.google.cloud.storage.StorageOptions;
 import javax.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/** Backend service controller for CloudStorage */
 @Service
 public class StorageService {
   private final Storage storage;
-
-  @Value("${storage.bucket.name}")
-  private String bucketName;
 
   public StorageService() {
     this.storage = StorageOptions.getDefaultInstance().getService();
@@ -40,11 +37,12 @@ public class StorageService {
   /**
    * Save a file to Cloud Storage.
    *
+   * @param bucketName name of the bucket
    * @param fileId unique id of the file
    * @param contentType content type of the file
    * @param content content of the file
    */
-  public void save(String fileId, String contentType, byte[] content) {
+  public void save(String bucketName, String fileId, String contentType, byte[] content) {
     BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileId).setContentType(contentType).build();
     storage.create(blobInfo, content);
   }
@@ -52,14 +50,19 @@ public class StorageService {
   /**
    * Delete a file with given fileId.
    *
+   * @param bucketName name of the bucket
    * @param fileId unique id of a file
    */
-  public void delete(String fileId) {
+  public void delete(String bucketName, String fileId) {
     storage.delete(bucketName, fileId);
   }
 
-  /** Delete all files in the bucket. */
-  public void batchDelete() {
+  /**
+   * Delete all files in the bucket.
+   *
+   * @param bucketName name of the bucket
+   */
+  public void batchDelete(String bucketName) {
     Page<Blob> blobs = storage.list(bucketName);
     if (!blobs.getValues().iterator().hasNext()) {
       return;
@@ -71,7 +74,7 @@ public class StorageService {
     batchRequest.submit();
   }
 
-  /** Close the channels and free resources. */
+  /** Close the channels and release resources. */
   @PreDestroy
   public void close() throws Exception {
     storage.close();

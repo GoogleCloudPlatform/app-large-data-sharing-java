@@ -16,34 +16,32 @@
 
 package com.googlecodesamples.cloud.jss.lds.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+/**
+ * The BaseFile class represents a file being uploaded by the users
+ */
 public class BaseFile extends FileMeta {
   private static final List<String> IMG_EXTENSIONS = List.of("png", "jpeg", "jpg", "gif");
   private static final String THUMBNAIL_EXTENSION = "_small";
   private String url;
   private String thumbUrl;
-
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   private Date createTime;
-
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   private Date updateTime;
 
-  public BaseFile() {}
+  public BaseFile() {
+  }
 
   public BaseFile(QueryDocumentSnapshot document, String resourceBasePath) {
     BaseFile file = document.toObject(BaseFile.class);
     BeanUtils.copyProperties(file, this);
     this.setUrl(resourceBasePath + file.getPath());
-    this.setThumbUrl(resourceBasePath + file.getThumbnailPath());
+    this.setThumbUrl(resourceBasePath + file.genThumbnailPath());
     this.setCreateTime(document.getCreateTime().toDate());
     this.setUpdateTime(document.getUpdateTime().toDate());
   }
@@ -80,13 +78,11 @@ public class BaseFile extends FileMeta {
     this.updateTime = updateTime;
   }
 
-  @JsonIgnore
-  public String getThumbnailPath() {
+  public String genThumbnailPath() {
     return getPath() + THUMBNAIL_EXTENSION;
   }
 
-  @JsonIgnore
-  public boolean isImage() {
+  public boolean checkImageFileType() {
     return IMG_EXTENSIONS.stream().anyMatch(e -> getName().toLowerCase().endsWith(e));
   }
 }

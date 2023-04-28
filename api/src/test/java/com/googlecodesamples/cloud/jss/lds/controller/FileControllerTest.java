@@ -45,59 +45,59 @@ import static com.google.common.truth.Truth.assertThat;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class FileControllerTest {
-    private static final Logger log = LoggerFactory.getLogger(FileControllerTest.class);
+  private static final Logger log = LoggerFactory.getLogger(FileControllerTest.class);
 
-    @Autowired
-    MockMvc mockMvc;
+  @Autowired
+  MockMvc mockMvc;
 
-    @MockBean
-    FileService fileService;
+  @MockBean
+  FileService fileService;
 
-    @Test
-    public void testHealthCheckReturnsNoContent() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/healthchecker"))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
-                .andExpect(MockMvcResultMatchers.content().string(""));
-    }
+  @Test
+  public void testHealthCheckReturnsNoContent() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/healthchecker"))
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
+            .andExpect(MockMvcResultMatchers.content().string(""));
+  }
 
-    @Test
-    public void testGetFilesResponse() throws Exception {
-        List<String> tags = List.of("test-tag");
-        String orderNo = "";
-        int size = 2;
+  @Test
+  public void testGetFilesResponse() throws Exception {
+    List<String> tags = List.of("test-tag");
+    String orderNo = "";
+    int size = 2;
 
-        // generate mock object
-        List<BaseFile> expectedResp = BaseFileTest.getTestFiles(size, true);
+    // generate mock object
+    List<BaseFile> expectedResp = BaseFileTest.getTestFiles(size, true);
 
-        // set up mock service response
-        Mockito.when(fileService.getFilesByTag(tags, orderNo, size)).thenReturn(expectedResp);
+    // set up mock service response
+    Mockito.when(fileService.getFilesByTag(tags, orderNo, size)).thenReturn(expectedResp);
 
-        // set up simulated HTTP request to the service
-        MockHttpServletRequestBuilder mockHttpReq = MockMvcRequestBuilders.get("/api/files")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .queryParam("tags", "test-tag")
-                .queryParam("orderNo", orderNo)
-                .queryParam("size", String.valueOf(size));
+    // set up simulated HTTP request to the service
+    MockHttpServletRequestBuilder mockHttpReq = MockMvcRequestBuilders.get("/api/files")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .queryParam("tags", "test-tag")
+            .queryParam("orderNo", orderNo)
+            .queryParam("size", String.valueOf(size));
 
-        // generate mock response from the simulated request
-        String mockResp = mockMvc.perform(mockHttpReq)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        log.info("mockResp: " + mockResp);
+    // generate mock response from the simulated request
+    String mockResp = mockMvc.perform(mockHttpReq)
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse().getContentAsString();
+    log.info("mockResp: " + mockResp);
 
-        // convert the mock response to JSON object
-        JsonObject convertedObj = new Gson().fromJson(mockResp, JsonObject.class);
-        log.info("convertedObj: " + convertedObj);
+    // convert the mock response to JSON object
+    JsonObject convertedObj = new Gson().fromJson(mockResp, JsonObject.class);
+    log.info("convertedObj: " + convertedObj);
 
-        assertThat(convertedObj.isJsonObject()).isTrue();
-        assertThat(mockResp).isEqualTo(convertedObj.toString());
-    }
+    assertThat(convertedObj.isJsonObject()).isTrue();
+    assertThat(mockResp).isEqualTo(convertedObj.toString());
+  }
 
-    @Test
-    public void testDeleteFileReturnsNotFound() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/files/unknown-id"))
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.content().string(""));
-    }
+  @Test
+  public void testDeleteFileReturnsNotFound() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.delete("/files/unknown-id"))
+            .andExpect(MockMvcResultMatchers.status().isNotFound())
+            .andExpect(MockMvcResultMatchers.content().string(""));
+  }
 }

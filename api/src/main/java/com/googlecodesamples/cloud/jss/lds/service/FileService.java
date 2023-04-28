@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/** Backend service controller for Firestore and CloudStorage */
 @Service
 public class FileService {
   private static final Logger log = LoggerFactory.getLogger(FirestoreService.class);
@@ -40,6 +41,9 @@ public class FileService {
 
   @Value("${resource.path}")
   private String basePath;
+
+  @Value("${storage.bucket.name}")
+  private String bucketName;
 
   public FileService(FirestoreService firestoreService, StorageService storageService) {
     this.firestoreService = firestoreService;
@@ -51,7 +55,7 @@ public class FileService {
    *
    * @param files list of files upload to the server
    * @param tags list of tags label the files
-   * @return list of files data
+   * @return list of uploaded files
    */
   public List<BaseFile> uploadFiles(List<MultipartFile> files, List<String> tags)
       throws InterruptedException, ExecutionException, IOException {
@@ -71,7 +75,7 @@ public class FileService {
    * @param newFile new file upload to the server
    * @param tags list of tags label the new file
    * @param file previously uploaded file
-   * @return file data
+   * @return the updated file
    */
   public BaseFile updateFile(MultipartFile newFile, List<String> tags, BaseFile file)
       throws InterruptedException, ExecutionException, IOException {
@@ -81,8 +85,8 @@ public class FileService {
       String pathId = LdsUtil.getPathId(file.getPath());
       return createOrUpdateFileMeta(tags, fileId, pathId, file.getName(), file.getSize());
     }
-    storageService.delete(file.getPath());
-    storageService.delete(file.getThumbnailPath());
+    storageService.delete(bucketName, file.getPath());
+    storageService.delete(bucketName, file.genThumbnailPath());
     String newFileId = LdsUtil.generateUuid();
     return createOrUpdateFile(newFile, tags, fileId, newFileId, newFile.getSize());
   }
@@ -90,13 +94,13 @@ public class FileService {
   /**
    * Delete a file from Firestore and Cloud Storage.
    *
-   * @param file uploaded file
+   * @param file the uploaded file
    */
-  public void deleteFile(BaseFile file) {
+  public void deleteFile(BaseFile file) throws InterruptedException, ExecutionException {
     log.info("entering deleteFile()");
     firestoreService.delete(file.getId());
-    storageService.delete(file.getPath());
-    storageService.delete(file.getThumbnailPath());
+    storageService.delete(bucketName, file.getPath());
+    storageService.delete(bucketName, file.genThumbnailPath());
   }
 
   /**
@@ -105,7 +109,7 @@ public class FileService {
    * @param tags list of tags label the files
    * @param orderNo application defined column for referencing order
    * @param size number of files return
-   * @return list of files data
+   * @return list of uploaded files
    */
   public List<BaseFile> getFilesByTag(List<String> tags, String orderNo, int size)
       throws InterruptedException, ExecutionException {
@@ -114,10 +118,10 @@ public class FileService {
   }
 
   /**
-   * Search a file with given fileId.
+   * Search a single file with given fileId.
    *
    * @param fileId unique id of the file
-   * @return file data
+   * @return the uploaded file
    */
   public BaseFile getFileById(String fileId) throws InterruptedException, ExecutionException {
     log.info("entering getFileById()");
@@ -125,10 +129,10 @@ public class FileService {
   }
 
   /** Delete all files from Firestore and Cloud Storage. */
-  public void resetFile() {
+  public void resetFile() throws InterruptedException, ExecutionException {
     log.info("entering resetFile()");
     firestoreService.deleteCollection();
-    storageService.batchDelete();
+    storageService.batchDelete(bucketName);
   }
 
   /**
@@ -136,8 +140,8 @@ public class FileService {
    *
    * @param file file upload to the server
    * @param tags list of tags label the file
-   * @param fileId unique id of the file
-   * @param newFileId unique id of the new file (for referencing Cloud Storage)
+   * @param fileId unique ID of the file
+   * @param newFileId unique ID of the new file (for referencing Cloud Storage)
    * @param size size of the file
    * @return file data
    */
@@ -146,9 +150,9 @@ public class FileService {
       throws InterruptedException, ExecutionException, IOException {
     BaseFile newFile =
         createOrUpdateFileMeta(tags, fileId, newFileId, file.getOriginalFilename(), size);
-    storageService.save(newFile.getPath(), file.getContentType(), file.getBytes());
-    if (newFile.isImage()) {
-      createThumbnail(file, newFile.getThumbnailPath());
+    storageService.save(bucketName, newFile.getPath(), file.getContentType(), file.getBytes());
+    if (newFile.checkImageFileType()) {
+      createThumbnail(file, newFile.genThumbnailPath());
     }
     return newFile;
   }
@@ -184,6 +188,7 @@ public class FileService {
         .size(THUMBNAIL_SIZE, THUMBNAIL_SIZE)
         .keepAspectRatio(false)
         .toOutputStream(byteArrayOutputStream);
-    storageService.save(thumbnailId, file.getContentType(), byteArrayOutputStream.toByteArray());
+    storageService.save(
+        bucketName, thumbnailId, file.getContentType(), byteArrayOutputStream.toByteArray());
   }
 }

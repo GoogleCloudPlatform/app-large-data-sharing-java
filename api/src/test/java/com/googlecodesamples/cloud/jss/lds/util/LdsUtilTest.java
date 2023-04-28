@@ -20,34 +20,50 @@ import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
+/**
+ * Unit test for LdsUtil class
+ */
 public class LdsUtilTest {
 
-    @Test
-    public void testGetFileBucketPath() {
-        String basePath = "192.168.0.1/resource";
-        String fileId = "test";
-        String fileBucketPath = LdsUtil.getFileBucketPath(basePath, fileId);
-        assertThat(fileBucketPath).isEqualTo("192.168.0.1/resource/test");
-    }
+  @Test
+  public void testGetResourceBasePath() {
+    String rootPath = LdsUtil.getResourceBasePath("/test/1/2/resource");
+    assertThat(rootPath).isNotEmpty();
+    assertThat(rootPath).isEqualTo("/");
 
-    @Test
-    public void testGetPathId() {
-        String id = LdsUtil.getPathId("192.168.0.1/resource/test");
-        assertThat(id).isEqualTo("test");
+    rootPath = LdsUtil.getResourceBasePath("test/1/2/resource");
+    assertThat(rootPath).isEmpty();
 
-        id = LdsUtil.getPathId("192.168.0.1/resource/1/2/3/test");
-        assertThat(id).isEqualTo("test");
+    rootPath = LdsUtil.getResourceBasePath("test");
+    assertThat(rootPath).isEmpty();
+  }
 
-        id = LdsUtil.getPathId("/resource");
-        assertThat(id).isEqualTo("resource");
+  @Test
+  public void testGetFileBucketPath() {
+    String basePath = "192.168.0.1/resource";
+    String fileId = "test";
+    String fileBucketPath = LdsUtil.getFileBucketPath(basePath, fileId);
+    assertThat(fileBucketPath).isEqualTo("192.168.0.1/resource/test");
+  }
 
-        id = LdsUtil.getPathId("/resource/test");
-        assertThat(id).isEqualTo("test");
-    }
+  @Test
+  public void testGetPathId() {
+    String id = LdsUtil.getPathId("192.168.0.1/resource/test");
+    assertThat(id).isEqualTo("test");
 
-    @Test
-    public void testGenerateUuid() {
-        String uuid = LdsUtil.generateUuid();
-        assertThat(uuid.length()).isEqualTo(36);
-    }
+    id = LdsUtil.getPathId("192.168.0.1/resource/1/2/3/test");
+    assertThat(id).isEqualTo("test");
+
+    id = LdsUtil.getPathId("/resource");
+    assertThat(id).isEqualTo("resource");
+
+    id = LdsUtil.getPathId("/resource/test");
+    assertThat(id).isEqualTo("test");
+  }
+
+  @Test
+  public void testGenerateUuid() {
+    String uuid = LdsUtil.generateUuid();
+    assertThat(uuid.length()).isEqualTo(36);
+  }
 }

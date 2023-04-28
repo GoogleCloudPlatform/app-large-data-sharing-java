@@ -8,11 +8,25 @@
 *.ipr
 .vscode/
 *.code-workspace
-target/
-api/target/
+*.launch
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
 
 # Compiled class files
 *.class
+target/
+api/target/
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
 
 # Package files
 *.jar
@@ -33,10 +47,22 @@ replay_pid*
 node_modules/
 frontend/package-lock.json
 .npm
+npm-debug.log
+yarn-error.log
 
 # Local files
 .DS_Store
+Thumbs.db
 tmp
 data/*
 *.swp
 dist
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
