@@ -41,6 +41,7 @@ mvn compile com.google.cloud.tools:jib-maven-plugin:3.3.1:build
 LDS_BUCKET = <bucket name of Cloud Storage>
 LDS_LB_URL = <url of the load balancer>
 LDS_REST_PORT = <port of the application server>
+LDS_FIRESTORE = <name of the Firestore collection>
 ```
 
 
