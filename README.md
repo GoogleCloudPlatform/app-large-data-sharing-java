@@ -6,22 +6,42 @@
 3. Cloud Load Balancing
 4. Firestore
 
-## Dockerized a Spring Boot application
+## Install dependencies
+```bash
+cd api/
+mvn clean install
+```
+
+## Quick testing
+```bash
+# [Unit Test]
+mvn test -Punit-test
+
+# [Integration Test]
+# Please set up your cloud infrastructure before running the integration test
+# 1. Cloud Storage and Firestore database must be enabled first
+# 2. Set up gcloud cli tools on your environment
+# 3. Set up default credential with 'gcloud auth application-default login'
+mvn test -Pintegration-test
+```
+
+## Style linting
+```bash
+mvn clean checkstyle:check
+```
+
+## Dockerize the application
 ```bash
 export LDS_IMAGE_NAME = <image name of the application, eg. gcr.io/my-project/my-application>
 mvn compile com.google.cloud.tools:jib-maven-plugin:3.3.1:build
 ```
 
-## Style Linting
-```bash
-mvn clean checkstyle:check
-```
-
-### REST Server Env.
+## REST server variables
 ```bash
 LDS_BUCKET = <bucket name of Cloud Storage>
 LDS_LB_URL = <url of the load balancer>
 LDS_REST_PORT = <port of the application server>
+LDS_FIRESTORE = <name of the Firestore collection>
 ```
 
 # Frontend
