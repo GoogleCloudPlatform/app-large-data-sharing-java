@@ -16,21 +16,23 @@
 
 package com.googlecodesamples.cloud.jss.lds.model;
 
+import java.util.List;
+
 /**
- * The FileResponse is a wrapper class for the API endpoint that returns a single file as response
+ * The FileListResponse is a wrapper class for the API endpoint that returns a list of files as response
  */
-public class FileResponse {
-  private BaseFile file;
+public class FileListResponse {
+  private List<BaseFile> files;
 
-  public FileResponse(BaseFile file) {
-    this.file = file;
+  public FileListResponse(List<BaseFile> files) {
+    this.files = files;
   }
 
-  public BaseFile getFile() {
-    return file;
+  public List<BaseFile> getFiles() {
+    return files;
   }
 
-  public void setFile(BaseFile file) {
-    this.file = file;
+  public void setFiles(List<BaseFile> files) {
+    this.files = files;
   }
 }
