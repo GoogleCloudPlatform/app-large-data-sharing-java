@@ -44,7 +44,6 @@ LDS_REST_PORT = <port of the application server>
 LDS_FIRESTORE = <name of the Firestore collection>
 ```
 
-
 # Frontend
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.0.
